@@ -1,7 +1,9 @@
-import React, {useState} from 'react';
+import React from 'react';
 import css from './Contacts.module.css';
+import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from '../store/sliceContacts';
+import { getContactsThunk, addContactsThunk } from '../store/contactsThunk';
+// import { addContact } from '../store/sliceContacts';
 
 
 export default function NewContactForm(){
@@ -9,8 +11,13 @@ export default function NewContactForm(){
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
   const dispatch = useDispatch();
-  const contacts = useSelector(state => state.contacts)
-console.log(contacts);
+  const contacts = useSelector(state => state.contacts.items)
+  
+  // console.log(contacts);
+
+  useEffect(() => {
+    dispatch(getContactsThunk());
+  }, [dispatch]);
 
   const handleChange = e => {
     const { name, value } = e.currentTarget;
@@ -20,23 +27,34 @@ console.log(contacts);
       setNumber(value);
     }
   };
+ 
   
-
   const reset = () => {
     setName('');
     setNumber('');
   };
+  
+
+
 
   const handleSubmit = e => {
+    const contact = {
+      name: name,
+      phone: number,
+    };
     e.preventDefault();
-    if (contacts.some(value => value.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+    if (
+      contacts.some(
+        value => value.name.toLocaleLowerCase() === name.toLocaleLowerCase()
+      )
+    ) {
       alert(`${name} is already in contacts`);
     } else {
-      dispatch(addContact({ name, number }));
+      dispatch(addContactsThunk(contact));
     }
     reset();
   };
-console.log(addContact())
+// console.log(addContact())
 
   return(
     <form className={css.form} onSubmit={handleSubmit}>
